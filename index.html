@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vera 薇拉 · 亚马逊点火线圈每日补货看板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1b2a;color:#c9d6df;line-height:1.5}
+.container{max-width:1300px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:30px 0 20px;border-bottom:1px solid #1b3a52}
+.header h1{font-size:2em;color:#5d9cec;margin-bottom:4px}
+.header .sub{color:#5c7a92;font-size:.9em}
+.header .date{color:#ff9800;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:20px 0}
+.card{background:#14283a;border-radius:8px;padding:14px;text-align:center;border-top:3px solid #5d9cec}
+.card .num{font-size:1.8em;font-weight:700}
+.card .label{font-size:.75em;color:#5c7a92;margin-top:4px}
+.card.red{border-color:#e74c3c}.card.red .num{color:#e74c3c}
+.card.orange{border-color:#f39c12}.card.orange .num{color:#f39c12}
+.card.yellow{border-color:#f1c40f}.card.yellow .num{color:#f1c40f}
+.card.green{border-color:#2ecc71}.card.green .num{color:#2ecc71}
+.card.purple{border-color:#9b59b6}.card.purple .num{color:#9b59b6}
+.tabs{display:flex;gap:4px;margin:20px 0 0}
+.tab{padding:8px 16px;background:#14283a;color:#5c7a92;border:none;border-radius:6px 6px 0 0;cursor:pointer;font-size:.85em;transition:.2s}
+.tab.active{background:#1b3a52;color:#5d9cec}
+.tab:hover{color:#fff}
+.section{margin:0 0 20px;display:none}
+#emergency{display:block}
+table{width:100%;border-collapse:collapse;background:#14283a;border-radius:0 8px 8px 8px;overflow:hidden}
+th{background:#1b3a52;color:#7e99ae;font-weight:600;font-size:.78em;padding:8px 6px;text-align:left;position:sticky;top:0;white-space:nowrap}
+td{padding:6px;border-bottom:1px solid #1b3a52;font-size:.8em;white-space:nowrap}
+tr:hover{background:#1b3548}
+.badge-r{background:#e74c3c22;color:#e74c3c;padding:1px 6px;border-radius:8px;font-size:.75em;font-weight:600}
+.badge-o{background:#f39c1222;color:#f39c12;padding:1px 6px;border-radius:8px;font-size:.75em;font-weight:600}
+.badge-y{background:#f1c40f22;color:#f1c40f;padding:1px 6px;border-radius:8px;font-size:.75em;font-weight:600}
+.badge-g{background:#2ecc7122;color:#2ecc71;padding:1px 6px;border-radius:8px;font-size:.75em;font-weight:600}
+.highlight{color:#f39c12;font-weight:600}
+.warn{color:#e74c3c;font-weight:600}
+.search-box{margin-bottom:12px;display:flex;gap:8px;align-items:center}
+.search-box input{background:#14283a;border:1px solid #1b3a52;color:#c9d6df;padding:8px 12px;border-radius:6px;width:250px;font-size:.85em}
+.search-box input::placeholder{color:#4a6a82}
+.info{color:#5c7a92;font-size:.78em;margin-left:8px}
+.footer{text-align:center;padding:20px;color:#3d5a72;font-size:.75em;border-top:1px solid #1b3a52;margin-top:30px}
+a{color:#5d9cec}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>⚡ Vera 薇拉 · 每日补货看板</h1>
+  <div class="sub">亚马逊美站点火线圈 FBA补货 · AI全自动数据驱动</div>
+  <div class="date">📅 2026-07-29 ｜ SMC 839条 ｜ BI 714条 ｜ ERP+BI 全自动</div>
+</div>
+
+<div class="cards">
+  <div class="card red"><div class="num">15</div><div class="label">🔴 最紧急</div></div>
+  <div class="card orange"><div class="num">22</div><div class="label">🟠 二紧急</div></div>
+  <div class="card yellow"><div class="num">28</div><div class="label">🟡 需补货</div></div>
+  <div class="card green"><div class="num">45</div><div class="label">🟢 正常</div></div>
+  <div class="card purple"><div class="num">80</div><div class="label">⏰ 超期预警</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('emergency',this)">🚨 紧急补货 (72)</button>
+  <button class="tab" onclick="switchTab('aging',this)">⏰ 超期预警 (77)</button>
+  <button class="tab" onclick="switchTab('normal',this)">🟢 库存正常 (36)</button>
+  <button class="tab" onclick="switchTab('logic',this)">📐 补货逻辑</button>
+</div>
+
+<div class="section" id="emergency">
+  <div class="search-box">
+    <input type="text" placeholder="搜索商编/ASIN/店铺..." oninput="filter('et',this.value)">
+    <span class="info">65条 · 按紧急度排序 · 建议补货量 = max(0, 90天销量 − 有效FBA库存)</span>
+  </div>
+  <table><thead><tr>
+    <th>商编</th><th>ASIN</th><th>店铺</th><th>紧度</th><th>库销比</th>
+    <th>FBA可用</th><th>在途</th><th>海外仓</th><th>有效库存</th><th>建议补</th><th>来源</th>
+  </tr></thead><tbody id="et"></tbody></table>
+</div>
+
+<div class="section" id="aging">
+  <div class="search-box">
+    <input type="text" placeholder="搜索商编/ASIN..." oninput="filter('at',this.value)">
+    <span class="info">80条 · 超期PCS = FBA中存放超过180天的数量</span>
+  </div>
+  <table><thead><tr>
+    <th>商编</th><th>ASIN</th><th>店铺</th><th>适配车型</th><th>超期PCS</th><th>严重度</th>
+  </tr></thead><tbody id="at"></tbody></table>
+</div>
+
+<div class="section" id="normal">
+  <div class="search-box">
+    <input type="text" placeholder="搜索商编/ASIN/店铺..." oninput="filter('nt',this.value)">
+    <span class="info">45条 · 有效库销比 ≥ 3</span>
+  </div>
+  <table><thead><tr>
+    <th>商编</th><th>ASIN</th><th>店铺</th><th>有效库销比</th><th>FBA可用</th><th>在途</th><th>海外仓</th><th>有效库存</th>
+  </tr></thead><tbody id="nt"></tbody></table>
+</div>
+
+<div class="section" id="logic">
+  <table><thead><tr><th style="width:200px">规则</th><th>说明</th></tr></thead><tbody>
+    <tr><td>🔢 库销比计算</td><td>有效FBA库存 ÷ 30天日均销量 = 库销比</td></tr>
+    <tr><td>📦 有效FBA库存</td><td>FBA可用 + FBA在途 + 上一轮海外仓已补量</td></tr>
+    <tr><td>🎯 目标库销比</td><td>补货后 ≥ 3（即目标库存 = 90天销量）</td></tr>
+    <tr><td>📊 建议补货量</td><td>max(0, 90天销量 − 有效FBA库存)，受库存上限约束</td></tr>
+    <tr><td>🏭 补货渠道</td><td>优先海外仓 → 海外仓无货则本地仓(库存>1) → ⚠无库存可补</td></tr>
+    <tr style="background:#1a2d3d"><td colspan="2"><b>库销比分级</b></td></tr>
+    <tr><td>🔴 最紧急</td><td>库销比 < 1 · FBA库存不足30天销量，随时断货</td></tr>
+    <tr><td>🟠 第二紧急</td><td>库销比 1~2 · 库存仅够1-2个月</td></tr>
+    <tr><td>🟡 需补货</td><td>库销比 2~3 · 低于安全线，需要补货</td></tr>
+    <tr><td>🟢 正常</td><td>库销比 3~5 · 库存充足</td></tr>
+    <tr><td>⚪ 库存过多</td><td>库销比 ≥ 5 · 关注滞销风险</td></tr>
+    <tr style="background:#1a2d3d"><td colspan="2"><b>⏰ 超期库存分级</b></td></tr>
+    <tr><td>🟡 超期(180+)</td><td>存放180-270天 · 需持续监控</td></tr>
+    <tr><td>🟠 紧急清理(270+)</td><td>存放270-365天 · 建议促销清理</td></tr>
+    <tr><td>🔴 深度滞销(365+)</td><td>存放超365天 · 必须马上处理</td></tr>
+    <tr style="background:#1a2d3d"><td colspan="2"><b>💰 定价异常监控</b></td></tr>
+    <tr><td>KAX ≥ PHILTOP × 1.1</td><td>KAX店铺定价不低于PHILTOP的1.1倍</td></tr>
+    <tr><td>Torchbeam ≥ KAX × 0.95</td><td>Torchbeam定价不低于KAX的0.95倍</td></tr>
+  </tbody></table>
+</div>
+
+<div class="footer">
+  🤖 Vera 薇拉 v2.0 · AI全自动数据采集+补货分析 · 用户通知即跑 · 2026-07-29
+</div>
+
+</div>
+
+<script>
+function switchTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).style.display='block';
+  btn.classList.add('active');
+}
+function filter(tid,q){
+  document.getElementById(tid).querySelectorAll('tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+// Full data from report
+const ED=[["MA1IGC21700", "B0H1QFMVR4", "KAX", "🔴 ", "0.7", "5", "0", "69", "", "16", "海外仓"], ["MA1IGC22500", "B0H1Q8H5FY", "KAX", "🔴 ", "0.8", "7", "0", "12", "", "12", "海外仓"], ["KX1IGC17000", "B0BLVK22R9", "PHILTOP", "🔴 ", "0.5", "1", "0", "22", "", "5", "海外仓"], ["KX1IGC17100", "B0BVYZG6VY", "KAX", "🔴 ", "0.8", "4", "0", "3", "", "3", "海外仓"], ["KX1IGC13200", "B0BN1NLNXM", "PHILTOP", "🔴 ", "0.2", "2", "0", "0", "", "10", "本地仓"], ["MA1IGC22500", "B0H1KQN7QJ", "PHILTOP", "🔴 ", "0.8", "3", "2", "12", "", "12", "海外仓"], ["MA1IGC22800", "B0BQV5YB3G", "PHILTOP", "🔴 ", "0.2", "1", "0", "8", "", "8", "海外仓"], ["KX1IGC31500", "B0CTF9GX28", "PHILTOP", "🔴 ", "0", "0", "0", "3", "", "3", "海外仓"], ["KX1IGC17300", "B0H1QGB61Z", "PHILTOP", "🔴 ", "0.2", "3", "0", "5", "", "5", "海外仓"], ["KX1IGC17600", "B0GCMF4MFW", "PHILTOP", "🔴 ", "0", "0", "0", "1", "", "1", "海外仓"], ["KX1IGC14900", "B0BLVH485H", "PHILTOP", "🔴 ", "0.8", "4", "0", "1", "", "1", "海外仓"], ["KX1IGC32800", "B0CTDLKYD1", "PHILTOP", "🔴 ", "0.9", "6", "0", "5", "", "5", "海外仓"], ["PT1IGC64500", "B0F52CPRH5", "PHILTOP", "🔴 ", "0.8", "7", "0", "0", "", "20", "⚠️ 无库存可补"], ["TB1IGC46800", "B0D91HPSM3", "Torchbeam", "🔴 ", "0.8", "1", "0", "1", "", "1", "海外仓"], ["KX1IGC15900", "B0BN1L6PZT", "PHILTOP", "🔴 ", "0.8", "0", "2", "1", "", "1", "海外仓"], ["MA1IGC20100", "B0BN1NG3VW", "PHILTOP", "🔴 ", "0.9", "2", "4", "0", "", "15", "⚠️ 无库存可补"], ["KX1IGC78500", "B0F61WZDBL", "KAX", "🔴 ", "0", "0", "0", "0", "", "6", "本地仓"], ["MA1IGC23200", "B0BQW2V3ZP", "KAX", "🔴 ", "0.9", "6", "0", "6", "", "6", "海外仓"], ["KX1IGC31800", "B0H36ZH7P4", "KAX", "🔴 ", "0.5", "1", "0", "8", "", "5", "海外仓"], ["KX1IGC29700", "B0CTF8Q6Z5", "PHILTOP", "🔴 ", "0", "0", "0", "0", "", "3", "⚠️ 无库存可补"], ["KX1IGC17900", "B0GCM3D9Z6", "PHILTOP", "🔴 ", "0", "0", "0", "3", "", "3", "海外仓"], ["KX1IGC29700", "B0CTK45PLP", "KAX", "🔴 ", "0", "0", "0", "0", "", "3", "⚠️ 无库存可补"], ["MA1IGC19100", "B0F2HG4HQ7", "Torchbeam", "🟠 ", "1.7", "10", "0", "4", "", "4", "海外仓"], ["KX1IGC14000", "B0GCMR9V8D", "PHILTOP", "🟠 ", "1", "2", "0", "4", "", "4", "海外仓"], ["KX1IGC33600", "B0CTK3GVT6", "KAX", "🟠 ", "1.5", "6", "0", "5", "", "5", "海外仓"], ["KX1IGC40000", "B0CTK417YD", "KAX", "🟠 ", "1.7", "4", "1", "10", "", "4", "海外仓"], ["PT1IGC71300", "B0F53259GB", "PHILTOP", "🟠 ", "1.8", "9", "0", "0", "", "6", "⚠️ 无库存可补"], ["KX1IGC31500", "B0CTK6WMHD", "KAX", "🟠 ", "1.3", "4", "0", "3", "", "3", "海外仓"], ["KX1IGC30400", "B0CTF91Y19", "PHILTOP", "🟠 ", "1.7", "27", "0", "5", "", "5", "海外仓"], ["KX1IGC31700", "B0CTF7GT4R", "PHILTOP", "🟠 ", "1.2", "4", "6", "6", "", "6", "海外仓"], ["KX1IGC39000", "B0H1KVG1NF", "PHILTOP", "🟠 ", "1", "4", "0", "10", "", "8", "海外仓"], ["KX1IGC13500", "B0H1QMQDNK", "PHILTOP", "🟠 ", "1.8", "9", "0", "22", "", "6", "海外仓"], ["TB1IGC46600", "B0H1QL9N16", "Torchbeam", "🟠 ", "1.2", "1", "4", "4", "", "4", "海外仓"], ["BP1IGC24300", "B0GCM7XH88", "KAX", "🟠 ", "1", "1", "0", "6", "", "4", "海外仓"], ["KX1IGC12600", "B0BN1NCDSY", "PHILTOP", "🟠 ", "1.7", "5", "0", "22", "", "4", "海外仓"], ["KX1IGC38800", "B0CTF8PPMG", "PHILTOP", "🟠 ", "1.5", "29", "0", "1", "", "1", "海外仓"], ["KX1IGC33600", "B0CTFBWXPL", "PHILTOP", "🟠 ", "1.4", "13", "0", "5", "", "5", "海外仓"], ["PT1IGC72900", "B0GTPFDJY6", "PHILTOP", "🟠 ", "1.1", "4", "4", "0", "", "13", "⚠️ 无库存可补"], ["KX1IGC83400", "B0F621CP9Y", "KAX", "🟠 ", "1.2", "5", "0", "0", "", "2", "本地仓"], ["KX1IGC15800", "B0BQVS3D8W", "KAX", "🟠 ", "1.9", "16", "1", "0", "", "8", "本地仓"], ["KX1IGC32700", "B0CTFBFWP5", "PHILTOP", "🟠 ", "1.1", "16", "1", "0", "", "31", "本地仓"], ["KX1IGC30400", "B0CTJTLYM6", "KAX", "🟠 ", "1.9", "13", "0", "5", "", "5", "海外仓"], ["KX1IGC33800", "B0CTF9YJ46", "PHILTOP", "🟠 ", "1.6", "8", "0", "10", "", "7", "海外仓"], ["PT1IGC68100", "B0F5312ZGT", "PHILTOP", "🟠 ", "1.3", "9", "0", "0", "", "12", "⚠️ 无库存可补"], ["KX1IGC78000", "B0F62QL3NQ", "KAX", "🟠 ", "1.7", "5", "0", "5", "", "4", "海外仓"], ["TB1IGC51800", "B0H1QFTN8V", "Torchbeam", "🟠 ", "1.3", "12", "0", "5", "", "5", "海外仓"], ["KX1IGC14400", "B0BN1MXVND", "PHILTOP", "🟠 ", "1", "4", "0", "21", "", "8", "海外仓"], ["KX1IGC81400", "B0F6286KXZ", "KAX", "🟠 ", "1.2", "4", "0", "0", "", "4", "本地仓"], ["KX1IGC13200", "B0BQVPTWJ5", "KAX", "🟠 ", "1", "2", "0", "0", "", "4", "本地仓"], ["KX1IGC40000", "B0CTF9N668", "PHILTOP", "🟡 ", "2.3", "4", "3", "10", "", "2", "海外仓"], ["PT1IGC51600", "B0D9K2JBFT", "PHILTOP", "🟡 ", "2.8", "17", "0", "0", "", "1", "本地仓"], ["MA1IGC18700", "B0BQVV7DQB", "KAX", "🟡 ", "2.5", "20", "0", "3", "", "3", "海外仓"], ["KX1IGC12600", "B0BQVLXP6B", "KAX", "🟡 ", "2.7", "8", "0", "22", "", "1", "海外仓"], ["KX1IGC17000", "B0BXRQFLRN", "KAX", "🟡 ", "2.8", "11", "0", "22", "", "1", "海外仓"], ["MA1IGC19800", "B0H1QFVZT3", "KAX", "🟡 ", "2.7", "8", "0", "0", "", "1", "⚠️ 无库存可补"], ["MA1IGC23000", "B0GCN5ZX43", "PHILTOP", "🟡 ", "2.5", "0", "0", "27", "", "1", "海外仓"], ["KX1IGC32700", "B0CTK5K497", "KAX", "🟡 ", "2.5", "15", "0", "0", "", "3", "本地仓"], ["KX1IGC12700", "B0BQVP9664", "KAX", "🟡 ", "2.5", "25", "0", "5", "", "5", "海外仓"], ["TB1IGC52000", "B0D91G9BVV", "Torchbeam", "🟡 ", "2.8", "17", "0", "43", "", "1", "海外仓"], ["PT1IGC47500", "B0GTLLW8KL", "PHILTOP", "🟡 ", "2.8", "14", "0", "7", "", "1", "海外仓"], ["MA1IGC22300", "B0BQVY99YV", "KAX", "🟡 ", "2.5", "10", "0", "113", "", "3", "海外仓"], ["TB1IGC46900", "B0D91LG25J", "Torchbeam", "🟡 ", "2.9", "20", "0", "1", "", "1", "海外仓"], ["TB1IGC48300", "B0FFSKD441", "Torchbeam", "🟡 ", "2.8", "11", "0", "0", "", "1", "⚠️ 无库存可补"], ["TB1IGC50200", "B0D91FJ2N2", "Torchbeam", "🟡 ", "2.5", "15", "0", "7", "", "3", "海外仓"], ["PT1IGC64800", "B0F533TN16", "PHILTOP", "🟡 ", "2.9", "5", "27", "0", "", "1", "本地仓"], ["KX1IGC11800", "B0BN1P4WTX", "PHILTOP", "🟡 ", "2.3", "1", "0", "31", "", "2", "海外仓"], ["KX1IGC34300", "B0H36Z8ZVK", "KAX", "🟡 ", "2.8", "6", "0", "12", "", "1", "海外仓"], ["KX1IGC31200", "B0CTFBF5LX", "PHILTOP", "🟡 ", "2", "6", "0", "10", "", "3", "海外仓"], ["MA1IGC19800", "B0BQV8F5JT", "PHILTOP", "🟡 ", "2", "1", "0", "0", "", "1", "⚠️ 无库存可补"], ["KX1IGC39000", "B0CTK3ZDQT", "KAX", "🟡 ", "2.1", "7", "2", "10", "", "7", "海外仓"], ["KX1IGC38900", "B0H1QLXSJG", "PHILTOP", "🟡 ", "2.2", "9", "0", "4", "", "3", "海外仓"], ["KX1IGC15800", "B0BN1MXBYC", "PHILTOP", "🟡 ", "2", "6", "0", "0", "", "3", "本地仓"]];
+
+const AD=[["TB1IGC48200", "B0H1QMKG8P", "Torchbeam", "Jeep", "36", "🟠270+"], ["TB1IGC47200", "B0D91H6RKJ", "Torchbeam", "Toyota", "21", "🟠270+"], ["PT1IGC48300", "B0F2HTSYST", "PHILTOP", "Toyota", "20", "🟠270+"], ["MA1IGC19000", "B0BNMGGTGD", "PHILTOP", "Subaru", "15", "🟠270+"], ["PT1IGC68600", "B0F53G38DF", "PHILTOP", "Mazda", "13", "🟠270+"], ["KX1IGC13300", "B0BN1K2D1Q", "PHILTOP", "BMW", "12", "🟠270+"], ["PT1IGC71800", "B0F531ZHNW", "PHILTOP", "Lincoln", "12", "🟠270+"], ["MA1IGC20100", "B0BW8X8J13", "KAX", "Dodge", "12", "🟠270+"], ["MA1IGC23000", "B0BQWD1QLP", "KAX", "Dodge", "11", "🟠270+"], ["TB1IGC48600", "B0D91GT43G", "Torchbeam", "Ford", "11", "🟠270+"], ["TB1IGC48300", "B0FFSKD441", "Torchbeam", "Toyota", "10", "🟠270+"], ["KX1IGC77200", "B0F626MQ53", "KAX", "Jeep", "10", "🟠270+"], ["KX1IGC17500", "B0BQVJRK58", "KAX", "Toyota", "9", "🟠270+"], ["KX1IGC13500", "B0H1QMQDNK", "PHILTOP", "Dodge", "9", "🟠270+"], ["PT1IGC48900", "B0D9K2PMD8", "PHILTOP", "Toyota", "9", "🟠270+"], ["PT1IGC49500", "B0GTPQ8V35", "PHILTOP", "Toyota", "19", "🟠270+"], ["KX1IGC11300", "B0BQVY5XKR", "KAX", "Jeep", "9", "🟠270+"], ["MA1IGC23400", "B0BQVLNY9F", "KAX", "Toyota", "8", "🟠270+"], ["MA1IGC19800", "B0H1QFVZT3", "KAX", "Ford", "8", "🟠270+"], ["TB1IGC49500", "B0H1QKV7KJ", "Torchbeam", "Toyota", "8", "🟠270+"], ["TB1IGC47600", "B0D91H1MQ3", "Torchbeam", "Nissan", "9", "🟠270+"], ["MA1IGC22300", "B0BQVKRFRM", "PHILTOP", "Toyota", "7", "🟠270+"], ["KX1IGC75100", "B0F61ZPT19", "KAX", "Nissan", "7", "🟠270+"], ["TB1IGC51700", "B0D91H976Q", "Torchbeam", "Ford", "6", "🟠270+"], ["PT1IGC46600", "B0GTPGBBM9", "PHILTOP", "Toyota", "6", "🟠270+"], ["MA1IGC21900", "B0BQWG116F", "KAX", "Toyota", "6", "🟠270+"], ["KX1IGC78300", "B0F62756FZ", "KAX", "Ford", "6", "🟠270+"], ["KX1IGC78000", "B0F62QL3NQ", "KAX", "Toyota", "6", "🟠270+"], ["KX1IGC15400", "B0BQTZMY9Q", "PHILTOP", "Toyota", "7", "🟠270+"], ["TB1IGC50100", "B0D91HD3KM", "Torchbeam", "Chevrolet", "5", "🟠270+"], ["TB1IGC47800", "B0D91HBMZD", "Torchbeam", "Hyundai", "5", "🟠270+"], ["KX1IGC30300", "B0CTK3PL55", "KAX", "Volkswagen", "5", "🟠270+"], ["TB1IGC51900", "B0D91GK2DT", "Torchbeam", "Ford", "5", "🟠270+"], ["KX1IGC82400", "B0F61RWY2Y", "KAX", "Chevrolet", "5", "🟠270+"], ["TB1IGC48100", "B0D91GW6Q9", "Torchbeam", "Ford", "5", "🟠270+"], ["TB1IGC50200", "B0D91FJ2N2", "Torchbeam", "Ford", "14", "🟠270+"], ["MA1IGC21900", "B0BQVGS4X7", "PHILTOP", "Toyota", "10", "🟠270+"], ["TB1IGC48400", "B0D91H3B6K", "Torchbeam", "Jeep", "4", "🟠270+"], ["MA1IGC22000", "B0BNMGXB3S", "PHILTOP", "Dodge", "4", "🟠270+"], ["PT1IGC47500", "B0GTLLW8KL", "PHILTOP", "Ford", "4", "🟠270+"], ["KX1IGC40200", "B0H1QDP8TW", "KAX", "Volkswagen", "3", "🟠270+"], ["TB1IGC48800", "B0D91H4FT6", "Torchbeam", "Ford", "3", "🟠270+"], ["TB1IGC48900", "B0D91GTN58", "Torchbeam", "Toyota", "3", "🟠270+"], ["TB1IGC48000", "B0D91GB9R1", "Torchbeam", "Kia", "12", "🟠270+"], ["MA1IGC21700", "B0H1QFMVR4", "KAX", "BMW", "3", "🟠270+"], ["MA1IGC21400", "B0BW8WH221", "KAX", "Mercedes-Benz", "2", "🟠270+"], ["KX1IGC30500", "B0CTK41FBS", "KAX", "Hyundai", "2", "🟠270+"], ["TB1IGC52400", "B0D91G55BX", "Torchbeam", "Ford", "28", "🟡180+"], ["TB1IGC52300", "B0D91HD24B", "Torchbeam", "Ford", "25", "🟡180+"], ["TB1IGC48500", "B0D91GD8G4", "Torchbeam", "INFINITI", "15", "🟡180+"], ["TB1IGC47000", "B0H1QRGGS1", "Torchbeam", "Acura", "15", "🟡180+"], ["TB1IGC46900", "B0D91LG25J", "Torchbeam", "Honda", "14", "🟡180+"], ["TB1IGC51600", "B0D91GLD1V", "Torchbeam", "Ford", "13", "🟡180+"], ["PT1IGC65600", "B0GTV7GVMV", "PHILTOP", "Nissan", "11", "🟡180+"], ["TB1IGC46700", "B0D91GVB98", "Torchbeam", "Honda", "10", "🟡180+"], ["PT1IGC71300", "B0F53259GB", "PHILTOP", "Ford", "9", "🟡180+"], ["PT1IGC68100", "B0F5312ZGT", "PHILTOP", "Chevrolet", "9", "🟡180+"], ["KX1IGC13300", "B0BW8YMG9P", "KAX", "BMW", "8", "🟡180+"], ["MA1IGC19000", "B0C23WMV3Z", "KAX", "Subaru", "8", "🟡180+"], ["KX1IGC81700", "B0F6277NWV", "KAX", "Mercedes-Benz", "8", "🟡180+"], ["KX1IGC11800", "B0H1KSH8CX", "KAX", "Toyota", "8", "🟡180+"], ["KX1IGC12800", "B0BW8Z3MZN", "KAX", "Dodge", "8", "🟡180+"], ["MA1IGC18700", "B0BQVV7DQB", "KAX", "Jeep", "7", "🟡180+"], ["TB1IGC52000", "B0D91G9BVV", "Torchbeam", "Nissan", "6", "🟡180+"], ["KX1IGC17000", "B0BXRQFLRN", "KAX", "Mini", "5", "🟡180+"], ["MA1IGC22000", "B0BQWCS62M", "KAX", "Dodge", "5", "🟡180+"], ["MA1IGC22300", "B0BQVY99YV", "KAX", "Toyota", "5", "🟡180+"], ["KX1IGC12400", "B0BW8XY39R", "KAX", "Ram", "5", "🟡180+"], ["KX1IGC12600", "B0BQVLXP6B", "KAX", "Toyota", "4", "🟡180+"], ["KX1IGC14400", "B0BQW3DKFC", "KAX", "Hyundai", "3", "🟡180+"], ["KX1IGC13500", "B0BQW4DJDQ", "KAX", "Dodge", "3", "🟡180+"], ["TB1IGC51800", "B0H1QFTN8V", "Torchbeam", "Kia", "2", "🟡180+"], ["TB1IGC49800", "B0D91GD26H", "Torchbeam", "Subaru", "2", "🟡180+"], ["MA1IGC22500", "B0H1KQN7QJ", "PHILTOP", "Saab", "1", "🟡180+"], ["TB1IGC47900", "B0D91FT2FD", "Torchbeam", "Chevrolet", "1", "🟡180+"], ["PT1IGC51600", "B0D9K2JBFT", "PHILTOP", "Ford", "1", "🟡180+"], ["KX1IGC15900", "B0H1QFRTPG", "KAX", "BMW", "1", "🟡180+"]];
+
+const ND=[["PT1IGC49500", "B0GTPQ8V35", "PHILTOP", "4.8", "19", "0", "22", ""], ["MA1IGC19000", "B0BNMGGTGD", "PHILTOP", "4.2", "17", "0", "20", ""], ["TB1IGC48000", "B0D91GB9R1", "Torchbeam", "3.5", "21", "0", "25", ""], ["KX1IGC13300", "B0BW8YMG9P", "KAX", "3.4", "34", "0", "37", ""], ["KX1IGC13300", "B0BN1K2D1Q", "PHILTOP", "4.3", "13", "0", "37", ""], ["MA1IGC23000", "B0BQWD1QLP", "KAX", "3", "12", "0", "27", ""], ["TB1IGC48600", "B0D91GT43G", "Torchbeam", "3", "9", "0", "8", ""], ["KX1IGC77200", "B0F626MQ53", "KAX", "3.3", "10", "0", "5", ""], ["MA1IGC19000", "B0C23WMV3Z", "KAX", "3.1", "22", "6", "20", ""], ["MA1IGC22300", "B0BQVKRFRM", "PHILTOP", "4.5", "9", "0", "113", ""], ["TB1IGC51700", "B0D91H976Q", "Torchbeam", "3", "6", "0", "0", ""], ["KX1IGC12800", "B0BW8Z3MZN", "KAX", "4.8", "19", "0", "7", ""], ["KX1IGC15400", "B0BQTZMY9Q", "PHILTOP", "3.8", "12", "0", "3", ""], ["TB1IGC50100", "B0D91HD3KM", "Torchbeam", "3.3", "10", "0", "14", ""], ["KX1IGC78300", "B0F62756FZ", "KAX", "3", "9", "0", "4", ""], ["KX1IGC30300", "B0CTK3PL55", "KAX", "3", "6", "0", "24", ""], ["MA1IGC22000", "B0BNMGXB3S", "PHILTOP", "4.3", "11", "0", "11", ""], ["TB1IGC48800", "B0D91H4FT6", "Torchbeam", "4", "4", "0", "14", ""], ["KX1IGC13500", "B0BQW4DJDQ", "KAX", "3", "4", "2", "22", ""], ["TB1IGC51600", "B0D91GLD1V", "Torchbeam", "4", "14", "2", "16", ""], ["TB1IGC47100", "B0D91H1M2M", "Torchbeam", "4.1", "21", "60", "18", ""], ["TB1IGC51200", "B0D91GD3LG", "Torchbeam", "3", "6", "0", "3", ""], ["PT1IGC50900", "B0G1M695CY", "PHILTOP", "4", "8", "0", "1", ""], ["KX1IGC11700", "B0BN1P6XD6", "PHILTOP", "3", "7", "5", "26", ""], ["MA1IGC18900", "B0BNMH1GFD", "PHILTOP", "4", "19", "5", "20", ""], ["KX1IGC17300", "B0BVYZNHXC", "KAX", "4.8", "4", "15", "5", ""], ["KX1IGC31700", "B0CTK5NH9W", "KAX", "3", "5", "4", "6", ""], ["TB1IGC48700", "B0FFSK991H", "Torchbeam", "4.3", "37", "10", "0", ""], ["KX1IGC17900", "B0GCM3NJKP", "KAX", "3", "3", "0", "3", ""], ["KX1IGC15400", "B0BQVP9Y78", "KAX", "3.8", "19", "0", "3", ""], ["MA1IGC23400", "B0BNMVKM6V", "PHILTOP", "3", "6", "5", "11", ""], ["KX1IGC85100", "B0F62TS44B", "KAX", "4", "12", "0", "0", ""], ["KX1IGC11300", "B0FWRJLR97", "PHILTOP", "4", "4", "0", "11", ""], ["KX1IGC10600", "B0BQVN69DK", "KAX", "3", "9", "0", "45", ""], ["MA1IGC23200", "B0H376Z43B", "PHILTOP", "4", "3", "0", "6", ""], ["KX1IGC17500", "B0H115PFJK", "PHILTOP", "3", "4", "0", "4", ""]];
+
+function render(tid, data, cols){
+  document.getElementById(tid).innerHTML = data.map(r=>'<tr>'+r.map((v,i)=>{
+    if(cols[i]==='紧度'){const c=v.startsWith('🔴')?'badge-r':v.startsWith('🟠')?'badge-o':'badge-y';return `<td><span class="${c}">${v}</span></td>`}
+    if(cols[i]==='库销比'){const n=parseFloat(v)||0;return `<td class="${n<1?'warn':n<2?'highlight':''}">${v}</td>`}
+    if(cols[i]==='建议补')return `<td class="warn">${v}</td>`
+    if(cols[i]==='严重度'){const c=v.includes('365')?'badge-r':v.includes('270')?'badge-o':'badge-y';return `<td><span class="${c}">${v}</span></td>`}
+    return `<td>${v||''}</td>`
+  }).join('')+'</tr>').join('');
+}
+
+render('et',ED,['商编','ASIN','店铺','紧度','库销比','FBA可用','在途','海外仓','有效库存','建议补','来源']);
+render('at',AD,['商编','ASIN','店铺','适配车型','超期PCS','严重度']);
+render('nt',ND,['商编','ASIN','店铺','有效库销比','FBA可用','在途','海外仓','有效库存']);
+</script>
+</body>
+</html>
